@@ -1,0 +1,222 @@
+﻿<!doctype html>
+<html lang="en">
+	<head>
+		<title>Солнечная система</title>
+		<style>
+			body {
+				background: #000;
+			}
+
+		</style>
+		
+		<script src="Three.js"></script>
+		<script src="https://threejs.org/build/three.js"></script>
+		<script src="Detector.js"></script>
+		
+
+	</head>
+
+	<body>
+        <script>
+		    var radius = 6371,
+			rotationSpeed = 0.1,
+			moonScale = 0.23,
+
+			height = window.innerHeight,
+			width = window.innerWidth,
+
+			container, 
+
+			camera, controls, scene, renderer,
+			geometry, meshMoon,
+			dirLight, ambientLight,
+
+			clock = new THREE.Clock();
+
+		    window.onload = function () {
+		        if (!Detector.webgl) {
+		            Detector.addGetWebGLMessage();
+		            return;
+		        }
+		        init();
+		        animate();
+		    }
+
+		    function init() {
+		        container = document.createElement('div');
+		        document.body.appendChild(container);
+		        scene = new THREE.Scene();
+
+		        renderer = new THREE.WebGLRenderer({ clearAlpha: 1, clearColor: 0x000000, antialias: true });
+		        renderer.setSize(width, height);
+
+		        renderer.gammaInput = true;
+		        renderer.gammaOutput = true;
+
+		        container.appendChild(renderer.domElement);
+
+		        camera = new THREE.PerspectiveCamera(25, width / height, 50, 1e7);
+		        camera.position.z = radius ;
+		        scene.add(camera);
+				
+		        controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+		        controls.rotateSpeed = 1.0;
+		        controls.zoomSpeed = 1.2;
+		        controls.panSpeed = 0.2;
+
+		        controls.noZoom = false;
+		        controls.noPan = false;
+
+		        controls.staticMoving = false;
+		        controls.dynamicDampingFactor = 0.3;
+
+		        controls.minDistance = radius * 1.1;
+		        controls.maxDistance = radius * 1000;
+   
+		        controls.keys = [65, 83, 68]; // [ rotateKey, zoomKey, panKey ]
+
+		        dirLight = new THREE.PointLight(0xFFFFFF,1);
+		        dirLight.position.set(0, 0, 0).normalize();
+				
+				scene.add(dirLight);
+		        scene.add(new THREE.AmbientLight(0x404040));
+				
+				
+                var shader = THREE.ShaderUtils.lib["normal"],
+				uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+            
+				dist = 1000;
+		        
+				//Солнце				
+				scene.add(new THREE.AmbientLight(0x404040));
+		        Sun_light = new THREE.PointLight(0xffffff);
+		        Sun_light.position.set(0, 0, 0);
+		        scene.add(Sun_light);
+				Sun_rad = 500;
+		        Sun_materials = [
+					new THREE.MeshLambertMaterial({ ambient: 0xbbbbbb, map: THREE.ImageUtils.loadTexture('Sun.jpg') }),
+					new THREE.MeshBasicMaterial({ color: 0xff8000, transparent: true, opacity: 0.5 })
+		        ];
+		        Sun_object = THREE.SceneUtils.createMultiMaterialObject(new THREE.SphereGeometry(Sun_rad, 100, 50), Sun_materials);
+		        Sun_object.position.set(0, 0, 0);
+		        scene.add(Sun_object);
+				
+				//Меркурий
+				Mercury_rad = 200;
+				Mercury_geometry = new THREE.SphereGeometry(Mercury_rad, 100, 50);
+				var Mercury_Texture = THREE.ImageUtils.loadTexture("Mercury.jpg");
+				var Mercury_materials = new THREE.MeshPhongMaterial({ color: 0xffffff, map: Mercury_Texture });
+		        Mercury = new THREE.Mesh(Mercury_geometry, Mercury_materials);
+		        Mercury.position.set(0.8*dist, 0, 0.8*dist);
+		        scene.add(Mercury);
+				
+				//Венера
+				Venera_rad = 300;
+				Venera_geometry = new THREE.SphereGeometry(Venera_rad, 100, 50);
+				var Venera_Texture = THREE.ImageUtils.loadTexture("Venera.jpg");
+				var Venera_materials = new THREE.MeshPhongMaterial({ color: 0xffffff, map: Venera_Texture });
+		        Venera = new THREE.Mesh(Venera_geometry, Venera_materials);
+		        Venera.position.set(-1.5*dist, 0, -dist);
+		        scene.add(Venera);
+						
+				//Земля
+				Earth_rad = 350;
+				Earth_geometry = new THREE.SphereGeometry(Earth_rad, 100, 50);
+				var Earth_Texture = THREE.ImageUtils.loadTexture("Earth.jpg");
+				var Earth_materials = new THREE.MeshPhongMaterial({ color: 0xffffff, map: Earth_Texture });
+		        Earth = new THREE.Mesh(Earth_geometry, Earth_materials);
+		        Earth.position.set(1.5*dist, 0, -1.5*dist);
+		        scene.add(Earth);
+				
+				//Марс
+				Mars_rad = 250;
+				Mars_geometry = new THREE.SphereGeometry(Mars_rad, 100, 50);
+				var Mars_Texture = THREE.ImageUtils.loadTexture("Mars.jpg");
+				var Mars_materials = new THREE.MeshPhongMaterial({ color: 0xffffff, map: Mars_Texture });
+		        Mars = new THREE.Mesh(Mars_geometry, Mars_materials);
+		        Mars.position.set(-2*dist, 0, 2*dist);
+		        scene.add(Mars);
+				
+				//Юпитер
+				Jupiter_rad = 470;
+				Jupiter_geometry = new THREE.SphereGeometry(Jupiter_rad, 100, 50);
+				var Jupiter_Texture = THREE.ImageUtils.loadTexture("Jupiter.jpg");
+				var Jupiter_materials = new THREE.MeshPhongMaterial({ color: 0xffffff, map: Jupiter_Texture });
+		        Jupiter = new THREE.Mesh(Jupiter_geometry, Jupiter_materials);
+		        Jupiter.position.set(2.5*dist, 0, 3*dist);
+		        scene.add(Jupiter);
+
+				//Сатурн
+				Saturn_rad = 280;
+				Saturn_geometry = new THREE.SphereGeometry(Saturn_rad, 100, 50);
+				var Saturn_Texture = THREE.ImageUtils.loadTexture("Saturn.jpg");
+				var Saturn_materials = new THREE.MeshPhongMaterial({ color: 0xffffff, map: Saturn_Texture });
+		        Saturn = new THREE.Mesh(Saturn_geometry, Saturn_materials);
+		        Saturn.position.set(-3.5*dist, 0, -4*dist);
+		        scene.add(Saturn);
+				
+				//Уран
+				Uran_rad = 400;
+				Uran_geometry = new THREE.SphereGeometry(Uran_rad, 100, 50);
+				var Uran_Texture = THREE.ImageUtils.loadTexture("Uran.jpg");
+				var Uran_materials = new THREE.MeshPhongMaterial({ color: 0xffffff, map: Uran_Texture });
+		        Uran = new THREE.Mesh(Uran_geometry, Uran_materials);
+		        Uran.position.set(-2*dist, 0, 5*dist);
+		        scene.add(Uran);
+				
+				//Нептун
+				Neptune_rad = 420;
+				Neptune_geometry = new THREE.SphereGeometry(Neptune_rad, 100, 50);
+				var Neptune_Texture = THREE.ImageUtils.loadTexture("Neptune.jpg");
+				var Neptune_materials = new THREE.MeshPhongMaterial({ color: 0xffffff, map: Neptune_Texture });
+		        Neptune = new THREE.Mesh(Neptune_geometry, Neptune_materials);
+		        Neptune.position.set(3*dist, 0, -7*dist);
+		        scene.add(Neptune);
+								
+				
+		        window.addEventListener('resize', onWindowResize, false);
+				
+
+		    };
+			
+			
+
+
+		    function onWindowResize(event) {
+		        width = window.innerWidth;
+		        height = window.innerHeight;
+
+		        renderer.setSize(width, height);
+
+		        camera.aspect = width / height;
+		        camera.updateProjectionMatrix();
+
+		        controls.screen.width = width;
+		        controls.screen.height = height;
+
+		        camera.radius = (width + height) / 4;
+
+		    };
+
+		    function animate() {
+		        requestAnimationFrame(animate);
+		        render();
+		        stats.update();
+		    };
+			
+		    function render() {
+		        for (var i = 0, l = scene.children.length; i < l; i++) {
+		            var object = scene.children[i];
+		            object.rotation.x += 0.005;
+		            object.rotation.y += 0.005;
+		            object.rotation.z += 0.005;
+		        }
+				
+				controls.update();
+		        renderer.clear();
+		        renderer.render(scene, camera);
+		    };
+		</script>
+	</body>
+</html>
